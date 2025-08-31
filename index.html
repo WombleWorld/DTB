@@ -354,33 +354,14 @@
         </div>
 
 ```
-    <div class="admin-section">
-        <button class="admin-toggle" onclick="toggleAdmin()">Admin Access</button>
-        <div class="admin-content" id="admin-content">
-            <div id="password-prompt" style="display: block;">
-                <div class="input-group">
-                    <label>Enter Admin Password:</label>
-                    <input type="password" id="admin-password" placeholder="Password">
-                    <button class="game-btn" onclick="checkPassword()" style="margin-top: 10px;">Access Content Management</button>
-                </div>
-            </div>
-            <div id="admin-panel" style="display: none;">
-                <h3>Upload Excel File</h3>
-                <div class="input-group">
-                    <label>Upload DTB Member Data (Excel file):</label>
-                    <input type="file" id="excel-upload" accept=".xlsx,.xls" onchange="handleExcelUpload(event)">
-                    <small>Excel should have columns: Name, Role, and your custom categories</small>
-                </div>
-                
-                <h3>Or Add Members Manually</h3>
-                <div id="members-form-container">
-                    <!-- Member forms will be added here -->
-                </div>
-                <button class="game-btn" onclick="addMemberForm()">Add Another Member</button>
-                <button class="game-btn" onclick="saveMembers()">Save All Members</button>
-                <button class="game-btn" onclick="loadSampleData()">Load Sample Data</button>
-            </div>
-        </div>
+    <div class="introduction">
+        <p>There are many ways to assess the performance of a board. You could use outcomes. Or KPIs. Or evidence.</p>
+        
+        <p>Or you could rank them using an arbitrary card game invented by a sarcastic newsletter, judged via five deeply unfair categories, including a made-up stat we're calling the Manifesto-to-Action Ratio (MAR).</p>
+        
+        <p>Let's be honest: it's the only governance metric we actually trust.</p>
+        
+        <p><em>Attendance scored from Jan–Jun 2025 minutes. Committees include working groups, external rep roles, and whatever other meeting someone invented on a Tuesday night. Quotes are from minutes where they exist, otherwise they're the sort of nonsense they could plausibly have said after their third San Miguel.</em></p>
     </div>
 
     <div class="score-display">
@@ -575,47 +556,55 @@
         });
     }
 
-    // Sample data with realistic DTB stats
+    // Sample DTB members with scoring and info categories
     const sampleMembers = [
         {
             name: "Graeme Price",
             role: "Fundraising Chair",
-            stats: { "Years on Board": 4, "Meeting Attendance": 92, "Volunteer Hours": 450, "Fundraising Score": 95, "Experience Level": 88 }
+            stats: { "Years Experience": 88, "Meeting Attendance": 92, "Volunteer Hours": 85, "Fundraising Success": 95, "Business Acumen": 90 },
+            info: { "Hometown": "Shoreditch", "Day Job": "Executive Chair", "Fun Fact": "Loves ska music" }
         },
         {
             name: "Sean McLaughlin", 
             role: "Chair",
-            stats: { "Years on Board": 12, "Meeting Attendance": 98, "Volunteer Hours": 520, "Fundraising Score": 78, "Experience Level": 94 }
+            stats: { "Years Experience": 94, "Meeting Attendance": 98, "Volunteer Hours": 88, "Fundraising Success": 78, "Business Acumen": 85 },
+            info: { "Hometown": "London", "Day Job": "Retired Finance Director", "Fun Fact": "Built a bank from scratch" }
         },
         {
             name: "Simon Hood",
             role: "Commercial Expert",
-            stats: { "Years on Board": 1, "Meeting Attendance": 85, "Volunteer Hours": 180, "Fundraising Score": 92, "Experience Level": 85 }
+            stats: { "Years Experience": 85, "Meeting Attendance": 85, "Volunteer Hours": 65, "Fundraising Success": 92, "Business Acumen": 95 },
+            info: { "Hometown": "North West", "Day Job": "Business Owner", "Fun Fact": "£13m company turnover" }
         },
         {
             name: "Ian Robinson",
             role: "Business Owner",
-            stats: { "Years on Board": 2, "Meeting Attendance": 88, "Volunteer Hours": 280, "Fundraising Score": 82, "Experience Level": 79 }
+            stats: { "Years Experience": 79, "Meeting Attendance": 88, "Volunteer Hours": 75, "Fundraising Success": 82, "Business Acumen": 88 },
+            info: { "Hometown": "London", "Day Job": "Construction Consultant", "Fun Fact": "Scoreboard sponsor" }
         },
         {
             name: "Alex Folkes",
             role: "Veteran Volunteer",
-            stats: { "Years on Board": 3, "Meeting Attendance": 94, "Volunteer Hours": 680, "Fundraising Score": 76, "Experience Level": 91 }
+            stats: { "Years Experience": 91, "Meeting Attendance": 94, "Volunteer Hours": 95, "Fundraising Success": 76, "Business Acumen": 70 },
+            info: { "Hometown": "London", "Day Job": "Election Observer", "Fun Fact": "Yellow and Blue producer" }
         },
         {
             name: "James Longhurst",
             role: "Media Expert",
-            stats: { "Years on Board": 1, "Meeting Attendance": 90, "Volunteer Hours": 220, "Fundraising Score": 71, "Experience Level": 83 }
+            stats: { "Years Experience": 83, "Meeting Attendance": 90, "Volunteer Hours": 72, "Fundraising Success": 71, "Business Acumen": 87 },
+            info: { "Hometown": "London", "Day Job": "Media Consultant", "Fun Fact": "Guardian & Telegraph veteran" }
         },
         {
             name: "Martin Drake",
             role: "Financial Analyst",
-            stats: { "Years on Board": 6, "Meeting Attendance": 96, "Volunteer Hours": 390, "Fundraising Score": 84, "Experience Level": 89 }
+            stats: { "Years Experience": 89, "Meeting Attendance": 96, "Volunteer Hours": 82, "Fundraising Success": 84, "Business Acumen": 86 },
+            info: { "Hometown": "London", "Day Job": "Project Manager", "Fun Fact": "Brings tin-foil cups to matches" }
         },
         {
             name: "Ivor Heller",
             role: "Former Commercial Director",
-            stats: { "Years on Board": 8, "Meeting Attendance": 89, "Volunteer Hours": 610, "Fundraising Score": 88, "Experience Level": 96 }
+            stats: { "Years Experience": 96, "Meeting Attendance": 89, "Volunteer Hours": 90, "Fundraising Success": 88, "Business Acumen": 92 },
+            info: { "Hometown": "London", "Day Job": "Former Commercial Director", "Fun Fact": "First Trust vice chair" }
         }
     ];
 
