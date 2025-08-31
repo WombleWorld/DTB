@@ -355,15 +355,31 @@
 
 ```
     <div class="admin-section">
-        <button class="admin-toggle" onclick="toggleAdmin()">Content Management</button>
+        <button class="admin-toggle" onclick="toggleAdmin()">Admin Access</button>
         <div class="admin-content" id="admin-content">
-            <h3>Add DTB Members & Stats</h3>
-            <div id="members-form-container">
-                <!-- Member forms will be added here -->
+            <div id="password-prompt" style="display: block;">
+                <div class="input-group">
+                    <label>Enter Admin Password:</label>
+                    <input type="password" id="admin-password" placeholder="Password">
+                    <button class="game-btn" onclick="checkPassword()" style="margin-top: 10px;">Access Content Management</button>
+                </div>
             </div>
-            <button class="game-btn" onclick="addMemberForm()">Add Another Member</button>
-            <button class="game-btn" onclick="saveMembers()">Save All Members</button>
-            <button class="game-btn" onclick="loadSampleData()">Load Sample Data</button>
+            <div id="admin-panel" style="display: none;">
+                <h3>Upload Excel File</h3>
+                <div class="input-group">
+                    <label>Upload DTB Member Data (Excel file):</label>
+                    <input type="file" id="excel-upload" accept=".xlsx,.xls" onchange="handleExcelUpload(event)">
+                    <small>Excel should have columns: Name, Role, and your custom categories</small>
+                </div>
+                
+                <h3>Or Add Members Manually</h3>
+                <div id="members-form-container">
+                    <!-- Member forms will be added here -->
+                </div>
+                <button class="game-btn" onclick="addMemberForm()">Add Another Member</button>
+                <button class="game-btn" onclick="saveMembers()">Save All Members</button>
+                <button class="game-btn" onclick="loadSampleData()">Load Sample Data</button>
+            </div>
         </div>
     </div>
 
@@ -408,6 +424,7 @@
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
     let gameData = {
         members: [],
@@ -420,6 +437,143 @@
         selectedMetric: null,
         roundInProgress: false
     };
+
+    function handleExcelUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            
+            // Get the first sheet
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            
+            // Convert to JSON
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+            
+            if (jsonData.length < 3) {
+                alert('Excel file needs: Row 1 = Headers, Row 2 = TYPE (SCORE/INFO), Row 3+ = Data');
+                return;
+            }
+            
+            // Extract headers (first row) and types (second row)
+            const headers = jsonData[0];
+            const types = jsonData[1];
+            
+            // Find Name and Role columns
+            const nameIndex = headers.findIndex(h => h && h.toLowerCase().includes('name'));
+            const roleIndex = headers.findIndex(h => h && h.toLowerCase().includes('role'));
+            
+            if (nameIndex === -1 || roleIndex === -1) {
+                alert('Excel file must have "Name" and "Role" columns');
+                return;
+            }
+            
+            // Separate scoring metrics from info fields using TYPE row
+            const scoringMetrics = [];
+            const infoFields = [];
+            const scoringIndices = [];
+            const infoIndices = [];
+            
+            headers.forEach((header, index) => {
+                if (index !== nameIndex && index !== roleIndex && header && header.trim()) {
+                    const type = types[index];
+                    if (type && type.toString().toUpperCase() === 'SCORE') {
+                        scoringMetrics.push(header.trim());
+                        scoringIndices.push(index);
+                    } else if (type && type.toString().toUpperCase() === 'INFO') {
+                        infoFields.push(header.trim());
+                        infoIndices.push(index);
+                    }
+                }
+            });
+            
+            if (scoringMetrics.length === 0) {
+                alert('Excel file must have at least one column marked as SCORE in row 2');
+                return;
+            }
+            
+            // Update game metrics (only scoring ones)
+            gameData.metrics = scoringMetrics;
+            
+            // Process member data (skip header and type rows)
+            gameData.members = [];
+            for (let i = 2; i < jsonData.length; i++) {
+                const row = jsonData[i];
+                const name = row[nameIndex];
+                const role = row[roleIndex];
+                
+                if (name && role) {
+                    const stats = {};
+                    const info = {};
+                    
+                    // Process scoring metrics
+                    scoringIndices.forEach((index, i) => {
+                        const metricName = scoringMetrics[i];
+                        const value = parseInt(row[index]) || 0;
+                        stats[metricName] = value;
+                    });
+                    
+                    // Process info fields
+                    infoIndices.forEach((index, i) => {
+                        const fieldName = infoFields[i];
+                        const value = row[index] || '';
+                        info[fieldName] = value;
+                    });
+                    
+                    gameData.members.push({
+                        name: name,
+                        role: role,
+                        stats: stats,
+                        info: info
+                    });
+                }
+            }
+            
+            alert(`Successfully loaded ${gameData.members.length} DTB members with ${scoringMetrics.length} scoring categories and ${infoFields.length} info fields!`);
+            regenerateMemberForms();
+        };
+        
+        reader.readAsArrayBuffer(file);
+    }
+
+    function regenerateMemberForms() {
+        const container = document.getElementById('members-form-container');
+        container.innerHTML = '';
+        
+        gameData.members.forEach(member => {
+            const formDiv = document.createElement('div');
+            formDiv.className = 'member-form';
+            
+            let statsInputs = '';
+            gameData.metrics.forEach(metric => {
+                const value = member.stats[metric] || 0;
+                statsInputs += `
+                    <div class="input-group">
+                        <label>${metric}:</label>
+                        <input type="number" class="stat-input" data-metric="${metric}" min="0" max="100" value="${value}">
+                    </div>
+                `;
+            });
+
+            formDiv.innerHTML = `
+                <div class="input-group">
+                    <label>Name:</label>
+                    <input type="text" class="member-name" placeholder="DTB Member Name" value="${member.name}">
+                </div>
+                <div class="input-group">
+                    <label>Role:</label>
+                    <input type="text" class="member-role" placeholder="e.g., Chair, Treasurer, etc." value="${member.role}">
+                </div>
+                ${statsInputs}
+            `;
+            
+            container.appendChild(formDiv);
+        });
+    }
 
     // Sample data with realistic DTB stats
     const sampleMembers = [
@@ -468,6 +622,20 @@
     function toggleAdmin() {
         const content = document.getElementById('admin-content');
         content.classList.toggle('active');
+    }
+
+    function checkPassword() {
+        const password = document.getElementById('admin-password').value;
+        // Change this password to whatever you want
+        const correctPassword = "DTB2025";
+        
+        if (password === correctPassword) {
+            document.getElementById('password-prompt').style.display = 'none';
+            document.getElementById('admin-panel').style.display = 'block';
+        } else {
+            alert('Incorrect password');
+            document.getElementById('admin-password').value = '';
+        }
     }
 
     function addMemberForm() {
@@ -661,6 +829,8 @@
 
     function createCardHTML(member, isPlayerCard) {
         let statsHTML = '';
+        
+        // Show scoring metrics (clickable for battles)
         Object.entries(member.stats).forEach(([statName, statValue]) => {
             const isSelected = statName === gameData.selectedMetric;
             const clickable = isPlayerCard && !gameData.selectedMetric && gameData.roundInProgress;
@@ -674,6 +844,20 @@
                 </div>
             `;
         });
+        
+        // Show info fields (non-clickable, just for display)
+        if (member.info) {
+            Object.entries(member.info).forEach(([fieldName, fieldValue]) => {
+                if (fieldValue) {
+                    statsHTML += `
+                        <div class="stat info-field">
+                            <span class="stat-name">${fieldName}</span>
+                            <span class="stat-value info-value">${fieldValue}</span>
+                        </div>
+                    `;
+                }
+            });
+        }
 
         return `
             <div class="card">
