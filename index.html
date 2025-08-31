@@ -721,8 +721,9 @@
 
     function startNewGame() {
         if (gameData.members.length === 0) {
-            alert('Please load sample data or add DTB members first!');
-            return;
+            // Auto-load the DTB data if not already loaded
+            gameData.members = [...sampleMembers];
+            gameData.metrics = Object.keys(sampleMembers[0].stats);
         }
 
         if (gameData.members.length < 4) {
@@ -741,7 +742,7 @@
 
         updateScoreDisplay();
         nextRound();
-        document.getElementById('game-status').textContent = 'Game started! Choose a metric from your card.';
+        document.getElementById('game-status').textContent = 'Game started! Choose a metric from your card to battle.';
     }
 
     function nextRound() {
